@@ -273,26 +273,45 @@ telecom-sionna-multiagent/
 # 🧠 Architecture Diagram
 
 User Prompt
+
 │
+
 ▼
+
 [Interpreter Agent]
+
 → identifies task type (constellation, BER, MIMO, radio map)
+
 │
+
 ▼
+
 [Parameter Extractor Agent]
+
 → extracts modulation, SNR list, antennas, tx positions, etc.
+
 │
+
 ▼
+
 [Simulation Agent]
+
 → maps task_type → MCP tool
+
 → executes Sionna simulation
+
 → returns plots + KPIs
+
 │
+
 ▼
+
 [Summary Agent]
+
 → natural language explanation of results
 
 yaml
+
 Copy code
 
 ---
@@ -304,13 +323,13 @@ Copy code
 git clone https://github.com/<YOUR_USERNAME>/telecom-sionna-multiagent.git
 cd telecom-sionna-multiagent
 
-2. Create virtual environment
+### 2. Create virtual environment
 bash
 Copy code
 py -m venv .venv
 .\.venv\Scripts\activate
 
-3. Install dependencies
+### 3. Install dependencies
 bash
 Copy code
 py -m pip install --upgrade pip
@@ -319,7 +338,7 @@ py -m pip install -r requirements.txt
 py eval/eval_runner.py
 pip install "pillow<12.0"
 
-4. Run the multi-agent system
+### 4. Run the multi-agent system
 bash
 Copy code
 py main.py
@@ -333,7 +352,7 @@ Compare 1x1 vs 4x4 MIMO with 64-QAM
 
 Multi-TX radio map at (0,0,10),(60,0,10),(−60,0,10)
 
-5. Run Gradio UI
+### 5. Run Gradio UI
 bash
 Copy code
 py ui/gradio_app.py
