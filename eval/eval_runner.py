@@ -1,5 +1,5 @@
 import json
-from telecom-sionna-multiagent.main import TelecomMultiAgentAssistant
+from telecom_sionna_multiagent.main import TelecomMultiAgentAssistant
 
 def run_eval(path="eval/sample_tasks.json"):
     assistant = TelecomMultiAgentAssistant()
