@@ -319,7 +319,7 @@ Copy code
 # How to Run Locally
 
 ### 1. Clone the repo
-```bash
+
 git clone https://github.com/<YOUR_USERNAME>/telecom-sionna-multiagent.git
 cd telecom-sionna-multiagent
 
@@ -353,7 +353,7 @@ Compare 1x1 vs 4x4 MIMO with 64-QAM
 Multi-TX radio map at (0,0,10),(60,0,10),(−60,0,10)
 
 ### 5. Run Gradio UI
-bash
+
 Copy code
 py ui/gradio_app.py
 
