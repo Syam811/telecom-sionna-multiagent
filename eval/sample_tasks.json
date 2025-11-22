@@ -1,5 +1,4 @@
 [
-  // -------- TRIVIAL (Constellation) --------
   {
     "id": "T1",
     "prompt": "Show constellation for 16-QAM at SNR 15 dB",
@@ -24,8 +23,6 @@
     "expected_task_type": "constellation",
     "expected_tool": "simulate_constellation"
   },
-
-  // -------- SIMPLE (BER) --------
   {
     "id": "S1",
     "prompt": "Compute BER curve for QPSK in AWGN from -5 to 15 dB",
@@ -56,8 +53,6 @@
     "expected_task_type": "ber",
     "expected_tool": "simulate_ber"
   },
-
-  // -------- MEDIUM (MIMO) --------
   {
     "id": "M1",
     "prompt": "Compare BER of 64-QAM for 1x1 vs 4x4 MIMO over Rayleigh fading from -5 to 15 dB",
@@ -76,8 +71,6 @@
     "expected_task_type": "mimo_comparison",
     "expected_tool": "simulate_ber_mimo"
   },
-
-  // -------- SIMPLE (Single Radio Map) --------
   {
     "id": "R1",
     "prompt": "Generate a radio map for a transmitter at (0,0,10) in a 200m x 200m area",
@@ -90,8 +83,6 @@
     "expected_task_type": "radiomap",
     "expected_tool": "simulate_radio_map"
   },
-
-  // -------- MEDIUM (Multi Radio Map) --------
   {
     "id": "MR1",
     "prompt": "Generate multi-transmitter radio map with TX at (0,0,10), (60,0,10), and (-60,0,10), using strongest-signal combination",
