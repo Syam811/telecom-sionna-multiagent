@@ -1,11 +1,11 @@
 requests==2.31.0
 numpy>=2.1.0
 matplotlib>=3.9.0
-gradio==4.14.0
-pydantic==2.6.0
-tqdm==4.66.1
-python-dotenv==1.0.0
+gradio>=5.0.0
+pydantic>=2.6.0
+tqdm>=4.66.1
+python-dotenv>=1.0.0
 
-# OPTIONAL — use these only in WSL2 or Linux (Windows installation fails)
+# OPTIONAL (only on Linux/WSL2)
 # tensorflow==2.13.0
 # sionna==0.16.0
