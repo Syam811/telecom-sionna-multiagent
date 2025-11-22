@@ -106,34 +106,37 @@ def simulate_ber_mimo(
                     y = out
                     h = None
 
-                # Convert to numpy for light combining/demapping
-                y_np = y.numpy()  # [B,1,nr] complex
+                # Convert to numpy and REMOVE singleton dims explicitly
+                y_np = y.numpy()  # expected [B, 1, nr]
                 if h is not None:
-                    h_np = h.numpy()  # [B,1,nr,nt] complex
+                    h_np = h.numpy()  # expected [B, 1, nr, nt]
                 else:
-                    # fallback: assume unit channel
                     h_np = np.ones((batch_size, 1, nr, nt), dtype=np.complex64)
-
-                # ---- MRC combining for repetition baseline ----
-                # y_hat = sum_{r,t} conj(h)*y / sum_{r,t} |h|^2
-                num = np.sum(np.conj(h_np) * y_np[..., None], axis=(2,3))   # [B,1]
-                den = np.sum(np.abs(h_np)**2, axis=(2,3)) + 1e-9           # [B,1]
-                s_hat = (num / den).reshape(-1)                            # [B]
-
+                
+                # Force exact shapes so numpy can't broadcast to (B,B,...)
+                y_np = np.squeeze(y_np, axis=1)          # [B, nr]
+                h_np = np.squeeze(h_np, axis=1)          # [B, nr, nt]
+                
+                # ---- MRC combining (repetition baseline) ----
+                # num: sum_{r,t} conj(h[r,t]) * y[r]
+                num = np.sum(np.conj(h_np) * y_np[:, :, None], axis=(1, 2))   # [B]
+                den = np.sum(np.abs(h_np)**2, axis=(1, 2)) + 1e-9             # [B]
+                s_hat = num / den                                             # [B]
+                
                 # ---- Hard nearest-neighbor demap ----
-                # Find nearest QAM point index
-                d2 = np.abs(s_hat[:, None] - const_pts[None, :])**2        # [B,M]
-                sym_idx_hat = np.argmin(d2, axis=1)                        # [B]
-
-                # True bits indices
-                b_np = b.numpy()
-                sym_idx_true = _bits_to_int(b_np)
-
-                # Convert estimated indices back to bits
-                b_hat = _int_to_bits(sym_idx_hat, k)
-
+                d2 = np.abs(s_hat[:, None] - const_pts[None, :])**2           # [B, M]
+                sym_idx_hat = np.argmin(d2, axis=1)                           # [B]
+                
+                # True bits
+                b_np = b.numpy().reshape(batch_size, k)                       # [B, k]
+                
+                # Estimated bits
+                b_hat = _int_to_bits(sym_idx_hat, k)                          # [B, k]
+                
+                # Count errors
                 n_err += np.sum(b_hat != b_np)
                 n_tot += batch_size * k
+
 
             bers.append(n_err / n_tot)
 
