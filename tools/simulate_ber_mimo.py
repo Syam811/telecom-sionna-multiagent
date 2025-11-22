@@ -6,7 +6,7 @@ from core.sionna_compat import phy_imports
 def simulate_ber_mimo(
     modulation: str = "64qam",
     snr_db_list=None,
-    configs=None,                   # [{"nt":1,"nr":1},{"nt":4,"nr":4}]
+    configs=None,
     n_bits: int = 150000,
     batch_size: int = 1000,
     out_dir: str = "outputs"
@@ -23,8 +23,8 @@ def simulate_ber_mimo(
     except Exception as e:
         return {"plots": [], "kpis": {}, "error": f"Sionna/TensorFlow import failed: {e}"}
 
+    # --- modulation ---
     mod = modulation.lower()
-
     if "qam" in mod:
         M = int(mod.replace("qam", ""))
         k = int(np.log2(M))
@@ -45,23 +45,38 @@ def simulate_ber_mimo(
 
         for snr_db in snr_db_list:
             no = ebnodb2no(snr_db, k, coderate=1.0)
-
             n_err = 0
             n_tot = 0
 
             while n_tot < n_bits:
                 b = tf.random.uniform([batch_size, k], 0, 2, dtype=tf.int32)
-                x = mapper(b)  # shape: [B, 1] complex symbols
+                x = mapper(b)
 
-                # Simple repetition baseline across nt antennas
+                # Repeat symbol across nt antennas
                 x_mimo = tf.tile(tf.expand_dims(x, axis=2), [1, 1, nt])
 
+                # --- FLEXIBLE CHANNEL OUTPUT ---
                 try:
-                    y, h = ch(x_mimo, no)
+                    out = ch(x_mimo, no)          # Sionna 1.x
                 except TypeError:
-                    y, h = ch([x_mimo, no])
+                    out = ch([x_mimo, no])        # Sionna 0.x
 
-                llr = demapper(y, h, no) if hasattr(demapper, "__call__") else demapper([y, h, no])
+                if isinstance(out, tuple):
+                    if len(out) == 1:
+                        y = out[0]
+                        h = None
+                    else:
+                        y = out[0]
+                        h = out[1]
+                else:
+                    y = out
+                    h = None
+
+                # --- Demapper ---
+                if h is None:
+                    llr = demapper(y, no) if hasattr(demapper, "__call__") else demapper([y, no])
+                else:
+                    llr = demapper(y, h, no) if hasattr(demapper, "__call__") else demapper([y, h, no])
 
                 b_hat = tf.cast(llr > 0, tf.int32)
                 n_err += tf.reduce_sum(tf.cast(tf.not_equal(b, b_hat), tf.int32)).numpy()
@@ -71,11 +86,10 @@ def simulate_ber_mimo(
 
         all_bers[label] = bers
 
-    # Plot
+    # --- Plot ---
     fig = plt.figure()
     for label, bers in all_bers.items():
         plt.semilogy(snr_db_list, bers, marker="o", label=label)
-
     plt.title(f"MIMO BER Comparison ({modulation.upper()} - Rayleigh)")
     plt.xlabel("SNR (dB)")
     plt.ylabel("BER")
